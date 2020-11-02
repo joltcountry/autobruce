@@ -1,0 +1,23 @@
+{
+  "name": "autobruce",
+  "version": "1.0.0",
+  "description": "Shark AI for the Jaws board game",
+  "main": "autobruce.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node autobruce"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joltcountry/autobruce.git"
+  },
+  "author": "Ben Parrish",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joltcountry/autobruce/issues"
+  },
+  "homepage": "https://github.com/joltcountry/autobruce#readme",
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  }
+}
