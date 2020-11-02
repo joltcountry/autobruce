@@ -5,7 +5,7 @@
   "main": "autobruce.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node autobruce"
+    "start": "DEBUG=true node autobruce"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/joltcountry/autobruce#readme",
   "dependencies": {
+    "chalk": "^4.1.0",
     "readline-sync": "^1.4.10"
   }
 }
