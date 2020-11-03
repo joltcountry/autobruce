@@ -10,6 +10,7 @@ var brody
 var map
 var round
 var phase
+var gameState
 
 getChar = (char) => {
     if ('quint'.startsWith(char)) return quint;
@@ -24,6 +25,7 @@ exports.nextPhase = () => {
     phase = (phase + 1) % 3
     if (phase == 0) {
         round += 1
+        gameState.launched = false;
     }
 }
 
@@ -32,7 +34,7 @@ exports.initAct1 = () => {
     log("Initializing Act I...")
 
     map = initMap()
-
+    gameState = {}
     round = 1
     phase = 0
 
@@ -41,11 +43,6 @@ exports.initAct1 = () => {
 
     bruce = {
         loc: waters[randomWater].tag
-    }
-
-    quint = {
-        loc: "8",
-        barrels: 2
     }
 
     quint = new Character("Quint", "8", 2);
@@ -80,7 +77,23 @@ exports.charCommand = (char, args) => {
 
     const action = args[0]
 
-    if ('fishfinder'.startsWith(action)) {
+    if ('binoculars'.startsWith(action)) {
+        let c = getChar(char)
+        let brodyLoc = map.find(loc => loc.tag === brody.loc)
+
+        if (!(c === brody)) {
+            foul('Only Brody may use binoculars')
+        } else if (!(brodyLoc.beach)) {
+            foul('Brody must be at a beach to use binoculars.')
+        } else {
+            if (bruce.loc === brody.loc && !gameState.outOfSight) {
+                bruceSays("Your binoculars spotted me!")
+            } else {
+                // TODO - nearby
+                bruceSays("I'm not at that beach!");
+            }
+        }
+    } else if ('fishfinder'.startsWith(action)) {
         if (!char.startsWith('h')) {
             foul('Only Hooper may use the Fishfinder')
         } else {
@@ -98,11 +111,14 @@ exports.charCommand = (char, args) => {
             foul('Only Quint may launch a barrel.')
         } else if (quint.barrels == 0) {
             foul('Quint has no barrels to launch.')
+        } else if (gameState.launched) {
+            foul('Quint may only launch one barrel per round.')
         } else {
             quint.barrels--
             let target = args[1] ? args[1] : quint.loc
-            targetLoc = map.find(loc => loc.tag === target);
+            targetLoc = map.find(loc => loc.tag === target.toUpperCase());
             targetLoc.barrels = targetLoc.barrels ? targetLoc.barrels + 1 : 1
+            gameState.launched = true
             console.log("Quint launched a barrel in location " + target)
         }
 
@@ -164,7 +180,7 @@ exports.charCommand = (char, args) => {
 
         // TODO fix rules about how much and from where
         let picker = getChar(char);
-        let targetLoc = map.find(loc =>loc.tag === picker.loc )
+        let targetLoc = map.find(loc => loc.tag === picker.loc )
         let num = args[1] ? args[1] : 1
 
         if (picker === brody && !targetLoc.dock) {
@@ -192,6 +208,68 @@ exports.charCommand = (char, args) => {
 
         console.log(picker.name + ' picked up ' + num + ' barrel[s] from the dock in location ' + targetLoc.tag)
 
+    } else if ('rescue'.startsWith(action)) {
+
+        // TODO michael
+        let rescuer = getChar(char);
+        let targetLoc = map.find(loc => loc.tag === rescuer.loc )
+
+        if (!targetLoc.beach) {
+            foul('Location ' + targetLoc.tag + ' is not a beach.')
+            return
+        }
+        if (!targetLoc.swimmers) {
+            foul('There are no swimmers to rescue in location ' + targetLoc.tag)
+            return
+        }
+
+        targetLoc.swimmers -= 1
+        console.log(rescuer.name + ' rescued 1 swimmer from location ' + targetLoc.tag)
+
+
+    } else if ('close'.startsWith(action)) {
+
+        if (args.length == 1) {
+            foul("Must specify which beach to close.")
+            return;
+        }
+
+        let closer = getChar(char)
+        let targetLoc = map.find(loc => loc.tag === args[1].toUpperCase())
+        let brodyLoc = map.find(loc => loc.tag === brody.loc);
+
+        if (!targetLoc) {
+            foul(args[1], 'is not a valid location.')
+            return
+        }
+
+        if (!(targetLoc.beach)) {
+            foul(args[1], 'is not a beach.')
+            return
+        }
+
+        if (!(closer === brody)) {
+            foul('Only Brody can close a beach.')
+            return
+        }
+
+        if (!brodyLoc.admin) {
+            foul('Brody must be at the PD or Mayor\'s office to close a beach.')
+            return
+        }
+
+        if (targetLoc.closed) {
+            foul('The ' + targetLoc.tag + ' beach is already closed.')
+            return
+        }
+
+        map.forEach(loc => {
+            loc.closed = 0;
+        })
+
+        targetLoc.closed = 2;
+        console.log('Brody has closed the ' + targetLoc.tag + ' beach.')
+
     } else {
         foul(action, 'is not a valid action.')
     }
@@ -212,4 +290,10 @@ exports.showStatus = () => {
             console.log(chalk.yellow('Location ' + loc.tag + ' has ' + loc.dockBarrels + ' barrel[s] on the dock.'))
         }
     })
+    map.filter(loc => loc.swimmers).forEach(loc => {
+        console.log(chalk.yellow('There are ' + loc.swimmers + ' swimmers at the ' + loc.tag + ' beach.'))
+    });
+    map.filter(loc => loc.closed).forEach(loc => {
+        console.log(chalk.yellow('The ' + loc.tag + ' beach is closed.'))
+    });
 }

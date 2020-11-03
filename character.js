@@ -1,5 +1,5 @@
 class Character {
-    
+
     constructor(name, loc, barrels, land) {
         this.name = name
         this.loc = loc
@@ -8,7 +8,7 @@ class Character {
     }
 
     toString() {
-        return this.name + " is at location " + this.loc + " with " + this.barrels + " barrels."
+        return this.name + " is at location " + this.loc + " with " + this.barrels + " barrel[s]."
     }
 }
 

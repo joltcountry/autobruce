@@ -32,12 +32,14 @@ exports.initMap = () => {
             tag: "6",
             water: true,
             land: true,
+            admin: true,
             adj: []
         },
         {
             tag: "7",
             water: true,
             land: true,
+            admin: true,
             adj: []
         },
         {
@@ -51,8 +53,9 @@ exports.initMap = () => {
             tag: "N",
             beach: true,
             water: true,
+            swimmers: 3,
             land: true,
-            adj: ["1", "5", "6", "STORE"],
+            adj: ["1", "5", "6", "STORE"]
         },
         {
             tag: "E",
